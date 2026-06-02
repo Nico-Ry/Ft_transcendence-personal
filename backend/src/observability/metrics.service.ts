@@ -16,7 +16,7 @@ export class MetricsService {
 	 * Example:
 	 * User enters valid credentials and receives a session.
 	 */
-	public readonly authLoginSuccessCounter: Counter<string>;
+	private readonly authLoginSuccessCounter: Counter<string>;
 
 	/**
 	 * Counts failed authentication attempts.
@@ -24,7 +24,7 @@ export class MetricsService {
 	 * Example:
 	 * Invalid email/password combination.
 	 */
-	public readonly authLoginFailureCounter: Counter<string>;
+	private readonly authLoginFailureCounter: Counter<string>;
 
 	/**
 	 * Indicates backend availability.
@@ -33,7 +33,7 @@ export class MetricsService {
 	 * 1 = backend healthy
 	 * 0 = backend unavailable
 	 */
-	public readonly backendUpGauge: Gauge<string>;
+	private readonly backendUpGauge: Gauge<string>;
 
 	constructor() {
 		this.registry = new Registry();
@@ -97,5 +97,23 @@ export class MetricsService {
 	 */
 	getContentType(): string {
 		return this.registry.contentType;
+	}
+
+	/**
+	 * Records a successful authentication event.
+	 *
+	 * @returns Nothing.
+	 */
+	recordLoginSuccess(): void {
+		this.authLoginSuccessCounter.inc();
+	}
+
+	/**
+	 * Records a failed authentication event.
+	 *
+	 * @returns Nothing.
+	 */
+	recordLoginFailure(): void {
+		this.authLoginFailureCounter.inc();
 	}
 }

@@ -12,6 +12,8 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { TwoFactorService } from './twofa.service';
 
+import { MetricsService } from '../observability/metrics.service';
+
 export interface FullAuthLoginResult {
 	type: 'full_auth';
 	access_token: string;
@@ -50,6 +52,7 @@ export class AuthService {
 		private readonly prisma: PrismaService,
 		private readonly jwtService: JwtService,
 		private readonly twoFactorService: TwoFactorService,
+		private readonly metricsService: MetricsService,
 	) {}
 
 	/**
@@ -199,6 +202,8 @@ export class AuthService {
 		});
 
 		if (!user || !user.passwordHash) {
+			this.metricsService.recordLoginFailure();
+
 			throw new UnauthorizedException('ERR_AUTH_INVALID_CREDENTIALS');
 		}
 
@@ -208,9 +213,13 @@ export class AuthService {
 		);
 
 		if (!passwordMatches) {
+			this.metricsService.recordLoginFailure();
+
 			throw new UnauthorizedException('ERR_AUTH_INVALID_CREDENTIALS');
 		}
 
+		this.metricsService.recordLoginSuccess();
+		
 		return this.createLoginResultForUser(user);
 	}
 

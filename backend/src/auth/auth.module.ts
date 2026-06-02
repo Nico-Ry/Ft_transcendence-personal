@@ -10,6 +10,8 @@ import { OAuthController } from './oauth.controller';
 import { OAuthService } from './oauth.service';
 import { TwoFactorService } from './twofa.service';
 
+import { ObservabilityModule } from '../observability/observability.module';
+
 @Module({
 	imports: [
 		JwtModule.register({
@@ -19,6 +21,7 @@ import { TwoFactorService } from './twofa.service';
 		PrismaModule,
 		HttpModule,
 		forwardRef(() => PresenceModule),
+		ObservabilityModule,
 	],
 	controllers: [AuthController, OAuthController],
 	providers: [AuthService, OAuthService, TwoFactorService, JwtAuthGuard],
