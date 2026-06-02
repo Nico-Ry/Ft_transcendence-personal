@@ -9,6 +9,8 @@ import { authenticator } from '@otplib/v12-adapter';
 import * as QRCode from 'qrcode';
 import { PrismaService } from '../prisma/prisma.service';
 
+import { MetricsService } from '../observability/metrics.service';
+
 const TWO_FACTOR_MAX_FAILED_ATTEMPTS = 5;
 const TWO_FACTOR_ATTEMPT_WINDOW_MS = 5 * 60 * 1000;
 const TWO_FACTOR_LOCK_MS = 5 * 60 * 1000;
@@ -47,6 +49,7 @@ export class TwoFactorService {
 	constructor(
 		private readonly prisma: PrismaService,
 		private readonly jwtService: JwtService,
+		private readonly metricsService: MetricsService,
 	) {}
 
 	/**
@@ -84,6 +87,8 @@ export class TwoFactorService {
 		}
 
 		if (state.lockedUntil > now) {
+			this.metricsService.recordTwoFactorLockout();
+
 			throw new UnauthorizedException('ERR_AUTH_2FA_TOO_MANY_ATTEMPTS');
 		}
 
@@ -202,6 +207,9 @@ export class TwoFactorService {
 
 		if (!isCodeValid) {
 			this.recordFailedAttempt(userId);
+
+			this.metricsService.recordTwoFactorInvalidCode();
+
 			throw new BadRequestException('ERR_AUTH_2FA_INVALID_CODE');
 		}
 
@@ -280,6 +288,9 @@ export class TwoFactorService {
 
 		if (!isCodeValid) {
 			this.recordFailedAttempt(userId);
+
+			this.metricsService.recordTwoFactorInvalidCode();
+
 			throw new BadRequestException('ERR_AUTH_2FA_INVALID_CODE');
 		}
 
@@ -307,6 +318,9 @@ export class TwoFactorService {
 
 		if (!isCodeValid) {
 			this.recordFailedAttempt(userId);
+
+			this.metricsService.recordTwoFactorInvalidCode();
+			
 			throw new BadRequestException('ERR_AUTH_2FA_INVALID_CODE');
 		}
 
