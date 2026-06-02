@@ -11,6 +11,8 @@ import { UsersModule } from './users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
+import { ObservabilityModule } from './observability/observability.module';
+
 @Module({
 	imports: [
 		UsersModule,
@@ -20,6 +22,7 @@ import { AppService } from './app.service';
 		ChatModule,
 		FriendsModule,
 		PresenceModule,
+		ObservabilityModule,
 	],
 	controllers: [AppController],
 	providers: [
