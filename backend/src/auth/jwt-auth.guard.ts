@@ -11,6 +11,8 @@ import type { DefaultEventsMap, Socket } from 'socket.io';
 import { IS_PUBLIC_KEY } from './public.decorator';
 import { extractAccessTokenFromCookie } from './utils/extract-access-token-from-cookie';
 
+import { MetricsService } from '../observability/metrics.service';
+
 export interface JwtPayload {
 	sub: number;
 	email: string;
@@ -44,6 +46,7 @@ export class JwtAuthGuard implements CanActivate {
 	constructor(
 		private readonly jwtService: JwtService,
 		private readonly reflector: Reflector,
+		private readonly metricsService: MetricsService,
 	) {}
 
 	/**
@@ -67,6 +70,8 @@ export class JwtAuthGuard implements CanActivate {
 		const token = this.extractTokenFromContext(context, contextType);
 
 		if (!token) {
+			this.metricsService.recordMissingToken();
+
 			if (contextType === 'ws') {
 				return false;
 			}
@@ -81,6 +86,8 @@ export class JwtAuthGuard implements CanActivate {
 
 			return true;
 		} catch {
+			this.metricsService.recordInvalidToken();
+			
 			if (contextType === 'ws') {
 				return false;
 			}

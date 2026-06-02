@@ -35,6 +35,26 @@ export class MetricsService {
 	 */
 	private readonly backendUpGauge: Gauge<string>;
 
+	/**
+	 * Counts requests rejected because no JWT was provided.
+	 */
+	private readonly jwtMissingTokenCounter: Counter<string>;
+
+	/**
+	 * Counts requests rejected because the JWT is invalid.
+	 */
+	private readonly jwtInvalidTokenCounter: Counter<string>;
+
+	/**
+	 * Counts invalid 2FA code submissions.
+	 */
+	private readonly twoFactorInvalidCodeCounter: Counter<string>;
+
+	/**
+	 * Counts temporary 2FA lockouts.
+	 */
+	private readonly twoFactorLockoutCounter: Counter<string>;
+
 	constructor() {
 		this.registry = new Registry();
 
@@ -63,6 +83,30 @@ export class MetricsService {
 		this.authLoginFailureCounter = new Counter({
 			name: 'auth_login_failure_total',
 			help: 'Total failed login attempts',
+			registers: [this.registry],
+		});
+
+		this.jwtMissingTokenCounter = new Counter({
+			name: 'jwt_missing_token_total',
+			help: 'Total requests rejected due to missing JWT',
+			registers: [this.registry],
+		});
+
+		this.jwtInvalidTokenCounter = new Counter({
+			name: 'jwt_invalid_token_total',
+			help: 'Total requests rejected due to invalid JWT',
+			registers: [this.registry],
+		});
+
+		this.twoFactorInvalidCodeCounter = new Counter({
+			name: 'twofa_invalid_code_total',
+			help: 'Total invalid 2FA codes submitted',
+			registers: [this.registry],
+		});
+
+		this.twoFactorLockoutCounter = new Counter({
+			name: 'twofa_lockout_total',
+			help: 'Total 2FA temporary lockouts',
 			registers: [this.registry],
 		});
 
@@ -115,5 +159,33 @@ export class MetricsService {
 	 */
 	recordLoginFailure(): void {
 		this.authLoginFailureCounter.inc();
+	}
+
+	/**
+	 * Records a missing JWT authentication failure.
+	 */
+	recordMissingToken(): void {
+		this.jwtMissingTokenCounter.inc();
+	}
+
+	/**
+	 * Records an invalid JWT authentication failure.
+	 */
+	recordInvalidToken(): void {
+		this.jwtInvalidTokenCounter.inc();
+	}
+
+	/**
+	 * Records an invalid TOTP submission.
+	 */
+	recordTwoFactorInvalidCode(): void {
+		this.twoFactorInvalidCodeCounter.inc();
+	}
+
+	/**
+	 * Records a 2FA lockout event.
+	 */
+	recordTwoFactorLockout(): void {
+		this.twoFactorLockoutCounter.inc();
 	}
 }
