@@ -70,3 +70,7 @@ cookies.txt
 # random images for avatar
 test-images/
 .vscode/
+
+# .NET build output
+**/bin/
+**/obj/
